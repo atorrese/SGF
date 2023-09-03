@@ -1,0 +1,120 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<form method="post" asp-action="ShowData" enctype="multipart/form-data">
+    <div>
+        <input type="file" name="FileExcel" id="FileExcel" />
+    </div>
+    <button class="btn btn-primary" type="submit">Enviar</button>
+</form>
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="card">
+            <div class="card-header"> Cargar Excel</div>
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <form id="form" enctype="multipart/form-data">
+                            <input class="form-control-file" type="file" id="inputExcel" name="files"/>
+                            
+                        </form>                    
+                      </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-warning" onclick="mostrarDatos()">Mostrar Datos</button>
+                        <button class="btn btn-success" onclick="enviarDatos()">Enviar Datos a BD</button>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="tbData" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Telefono</th>
+                                    <th>Correo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        function mostrarDatos(){
+            const formData = new FormData()
+            const input = document.getElementById("inputExcel")
+            var url = "@Url.Action("ShowData", "Home")/"
+            formData.append("FileExcel",input.files[0])
+            console.log(formData)
+            const objeto = $("#form").serialize()
+            console.log(objeto)
+            /*$.post(url, objeto).done(function (result) {
+                console.log(result)
+            }).fail((error) => {
+            
+            })*/
+            /*
+            $.ajax({
+                url: "/Home/ShowData",
+                data: formData,
+                method: 'POST',
+                dataType: 'json',
+                cache: false,
+                contentType: 'multipart/form-data',
+                processData: false,
+            })
+                .then((response) => { return response.json() })
+                .then((dataJson) => {
+
+
+                    dataJson.forEach((item) => {
+                        $("#tbData tbody").append(
+                            $("<tr>").append(
+                                $("<td>").text(item.nombre),
+                                $("<td>").text(item.apellido),
+                                $("<td>").text(item.telefono),
+                                $("<td>").text(item.correo)
+                            )
+
+                        )
+                    })
+
+                })*/
+        }
+
+        /*fetch("/Home/ShowData", {
+        method: "POST",
+        body: formData
+        }).then((response) => { return response.json() })
+        .then((dataJson) => {
+
+
+        dataJson.forEach((item) => {
+            $("#tbData tbody").append(
+                $("<tr>").append(
+                    $("<td>").text(item.nombre),
+                    $("<td>").text(item.apellido),
+                    $("<td>").text(item.telefono),
+                    $("<td>").text(item.correo)
+                )
+
+            )
+        })
+
+        })*/
+    </script>
+}
