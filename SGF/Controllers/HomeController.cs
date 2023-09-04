@@ -13,9 +13,10 @@ namespace SGF.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly AppDbContext _context;
-        public HomeController(ILogger<HomeController> logger)
+        public HomeController(ILogger<HomeController> logger, AppDbContext context)
         {
             _logger = logger;
+            _context = context;
         }
 
         public IActionResult Index()
@@ -81,15 +82,15 @@ namespace SGF.Controllers
                 for (int i = firstRowUsed + 1; i <= lastRowUsed; i++)
                 {
                     var row = sheet.Row(i);
-                    var contact = new Contacto
+                    Contacto contact = new Contacto
                     {
                         Nombre = row.Cell(1).GetString(),
                         Apellido = row.Cell(2).GetString(),
                         Telefono = row.Cell(3).GetString(),
                         Correo = row.Cell(4).GetString()
                     };
-                    this._context.Add(contact);
-                    this._context.SaveChanges();
+                    _context.Add(contact);
+                    _context.SaveChanges();
                     contacts.Add(contact);
                 }
 

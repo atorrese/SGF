@@ -1,10 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace SGF.Models
 {
-    public partial class Contacto
+    public class Contacto
     {
+        [Key]
         public int IdContacto { get; set; }
         public string? Nombre { get; set; }
         public string? Apellido { get; set; }
