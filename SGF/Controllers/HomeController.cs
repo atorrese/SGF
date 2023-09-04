@@ -102,10 +102,10 @@ namespace SGF.Controllers
                             Telefono = row.Cell(3).GetString(),
                             Correo = row.Cell(4).GetString()
                         };
-                        _context.Add(contact);
-                        _context.SaveChanges();
                         contacts.Add(contact);
                     }
+                    _context.AddRange(contacts);
+                    _context.SaveChanges();
                     transaction.Commit();
                     Console.WriteLine(FileExcel);
                     return StatusCode(StatusCodes.Status200OK, new { mensaje = "Ok" });
@@ -116,9 +116,6 @@ namespace SGF.Controllers
                     return Json(new { mensaje = ex.Message });
                 }
             }
-
-
-
         }
         private FileResult GenerateExcel(string nameFile, IEnumerable<Contacto> contacts)
         {
