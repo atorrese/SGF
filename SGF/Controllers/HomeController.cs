@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
+using SGF.Context;
 using SGF.Models;
 using System.Diagnostics;
 
@@ -11,7 +12,7 @@ namespace SGF.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
-
+        private readonly AppDbContext _context;
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
@@ -29,13 +30,13 @@ namespace SGF.Controllers
         }
 
         [HttpPost]
-        public IActionResult ShowData(/*[FromForm] IFormFile */ FileContacts FileExcel)
+        public IActionResult ShowData([FromForm] IFormFile  FileExcel)
         {
-            if (FileExcel.files.Length==0)
+            /*if (FileExcel.Length==0)
             {
                 return BadRequest("No existe archivo");
-            }
-            var workbook = new XLWorkbook(FileExcel.files[0].OpenReadStream());
+            }*/
+            var workbook = new XLWorkbook(FileExcel.OpenReadStream());
             var sheet = workbook.Worksheet(1);
             var sheetName = sheet.Name;
 
@@ -48,18 +49,60 @@ namespace SGF.Controllers
             {
                 var row = sheet.Row(i);
                 contacts.Add(new Contacto
-                            {
-                                Nombre = row.Cell(1).ToString(),
-                                Apellido = row.Cell(2).ToString(),
-                                Telefono = row.Cell(3).ToString(),
-                                Correo = row.Cell(4).ToString()
-                            });
-            }
+                {
+                    Nombre = row.Cell(1).GetString(),
+                    Apellido = row.Cell(2).GetString(),
+                    Telefono = row.Cell(3).GetString(),
+                    Correo = row.Cell(4).GetString()
+                });
 
+            }
             Console.WriteLine(FileExcel);
-            return StatusCode(StatusCodes.Status200OK);
+            return StatusCode(StatusCodes.Status200OK, contacts);
         }
 
+        [HttpPost]
+        public IActionResult SaveData([FromForm] IFormFile FileExcel)
+        {
+            try
+            {
+                if (FileExcel == null)
+                {
+                    return BadRequest("No existe archivo");
+                }
+                var workbook = new XLWorkbook(FileExcel.OpenReadStream());
+                var sheet = workbook.Worksheet(1);
+
+                var firstRowUsed = sheet.FirstRowUsed().RangeAddress.FirstAddress.RowNumber;
+                var lastRowUsed = sheet.LastRowUsed().RangeAddress.FirstAddress.RowNumber;
+
+                var contacts = new List<Contacto>();
+
+                for (int i = firstRowUsed + 1; i <= lastRowUsed; i++)
+                {
+                    var row = sheet.Row(i);
+                    var contact = new Contacto
+                    {
+                        Nombre = row.Cell(1).GetString(),
+                        Apellido = row.Cell(2).GetString(),
+                        Telefono = row.Cell(3).GetString(),
+                        Correo = row.Cell(4).GetString()
+                    };
+                    this._context.Add(contact);
+                    this._context.SaveChanges();
+                    contacts.Add(contact);
+                }
+
+                Console.WriteLine(FileExcel);
+                return StatusCode(StatusCodes.Status200OK, new { mensaje = "Ok" });
+            }
+            catch (Exception ex)
+            {
+                return Json( new { mensaje = ex.Message } );
+            }
+
+
+        }
 
         public IActionResult Privacy()
         {
