@@ -1,10 +1,13 @@
 ﻿using ClosedXML.Excel;
+using DocumentFormat.OpenXml.InkML;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using SGF.Context;
 using SGF.Models;
+using System.Data;
 using System.Diagnostics;
 
 namespace SGF.Controllers
@@ -28,6 +31,14 @@ namespace SGF.Controllers
         {
 
             return View();
+        }
+
+        [HttpGet]
+        public async Task<FileResult> ExportarData()
+        {
+            var personas = await _context.Contacto.ToListAsync();
+            var nombreArchivo = $"Contactos.xlsx";
+            return GenerateExcel(nombreArchivo, personas);
         }
 
         [HttpPost]
@@ -65,46 +76,81 @@ namespace SGF.Controllers
         [HttpPost]
         public IActionResult SaveData([FromForm] IFormFile FileExcel)
         {
-            try
+            if (FileExcel == null)
             {
-                if (FileExcel == null)
+                return BadRequest("No existe archivo");
+            }
+            using (var transaction = _context.Database.BeginTransaction())
+            {
+                try
                 {
-                    return BadRequest("No existe archivo");
-                }
-                var workbook = new XLWorkbook(FileExcel.OpenReadStream());
-                var sheet = workbook.Worksheet(1);
+                    var workbook = new XLWorkbook(FileExcel.OpenReadStream());
+                    var sheet = workbook.Worksheet(1);
 
-                var firstRowUsed = sheet.FirstRowUsed().RangeAddress.FirstAddress.RowNumber;
-                var lastRowUsed = sheet.LastRowUsed().RangeAddress.FirstAddress.RowNumber;
+                    var firstRowUsed = sheet.FirstRowUsed().RangeAddress.FirstAddress.RowNumber;
+                    var lastRowUsed = sheet.LastRowUsed().RangeAddress.FirstAddress.RowNumber;
 
-                var contacts = new List<Contacto>();
+                    var contacts = new List<Contacto>();
 
-                for (int i = firstRowUsed + 1; i <= lastRowUsed; i++)
-                {
-                    var row = sheet.Row(i);
-                    Contacto contact = new Contacto
+                    for (int i = firstRowUsed + 1; i <= lastRowUsed; i++)
                     {
-                        Nombre = row.Cell(1).GetString(),
-                        Apellido = row.Cell(2).GetString(),
-                        Telefono = row.Cell(3).GetString(),
-                        Correo = row.Cell(4).GetString()
-                    };
-                    _context.Add(contact);
-                    _context.SaveChanges();
-                    contacts.Add(contact);
+                        var row = sheet.Row(i);
+                        Contacto contact = new Contacto
+                        {
+                            Nombre = row.Cell(1).GetString(),
+                            Apellido = row.Cell(2).GetString(),
+                            Telefono = row.Cell(3).GetString(),
+                            Correo = row.Cell(4).GetString()
+                        };
+                        _context.Add(contact);
+                        _context.SaveChanges();
+                        contacts.Add(contact);
+                    }
+                    transaction.Commit();
+                    Console.WriteLine(FileExcel);
+                    return StatusCode(StatusCodes.Status200OK, new { mensaje = "Ok" });
                 }
+                catch (Exception ex)
+                {
+                    transaction.Rollback();
+                    return Json(new { mensaje = ex.Message });
+                }
+            }
 
-                Console.WriteLine(FileExcel);
-                return StatusCode(StatusCodes.Status200OK, new { mensaje = "Ok" });
-            }
-            catch (Exception ex)
-            {
-                return Json( new { mensaje = ex.Message } );
-            }
 
 
         }
+        private FileResult GenerateExcel(string nameFile, IEnumerable<Contacto> contacts)
+        {
+            DataTable dataTable = new DataTable("Contactos");
+            dataTable.Columns.AddRange(new DataColumn[]
+            {
+                new DataColumn("IdContacto"),
+                new DataColumn("Nombre"),
+                new DataColumn("Apellido"),
+                new DataColumn("Telefono"),
+                new DataColumn("Correo"),
+            });
 
+            foreach (var contact in contacts)
+            {
+                dataTable.Rows.Add(contact.IdContacto, contact.Nombre, contact.Apellido, contact.Telefono, contact.Correo);
+            }
+
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                wb.Worksheets.Add(dataTable);
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    wb.SaveAs(stream);
+                    return File(stream.ToArray(),
+                        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                        nameFile);
+                }
+            }
+
+        }
         public IActionResult Privacy()
         {
             /*Stream stream = FileExcel.OpenReadStream();

@@ -1,17 +1,14 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
 }
-<form method="post" asp-action="ShowData" enctype="multipart/form-data">
-    <div>
-        <input type="file" name="FileExcel" id="FileExcel" />
-    </div>
-    <button class="btn btn-primary" type="submit">Enviar</button>
-</form>
 <div class="row">
     <div class="col-sm-12">
 
         <div class="card">
-            <div class="card-header"> Cargar Excel</div>
+            <div class="card-header">
+                  
+                <span class="d-inline align-items-end">Cargar Excel<a class="btn btn-info" asp-action="ExportarData">Reporte Excel</a></span>
+            </div>
             <div class="card-body">
 
                 <div class="row">
@@ -58,6 +55,7 @@
 
         function mostrarDatos() {
             const url = "@Url.Action("ShowData", "Home")/";
+            //const url = "@Url.Action("GenerateExcel", "Home")/";
             const formData = new FormData($("#form")[0]);
 
             $.ajax({
