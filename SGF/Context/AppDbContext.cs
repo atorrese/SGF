@@ -15,5 +15,6 @@ namespace SGF.Context
         }
         
         public DbSet<Contacto> Contacto { get; set; }
+        public DbSet<Presupuesto> Presupuesto { get; set; }
     }
 }

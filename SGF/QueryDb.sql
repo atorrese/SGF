@@ -6,5 +6,5 @@ CREATE TABLE Contacto(
 	Telefono VARCHAR(100),
 	Correo VARCHAR(100)
 )
-SELECT COUNT(*) FROM Contacto
+SELECT * FROM Contacto
 --truncate table Contacto

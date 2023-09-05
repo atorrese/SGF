@@ -1,0 +1,129 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+<div class="row">
+    <div class="col-sm-12">
+
+        <div class="card">
+            <div class="card-header">
+
+                <span class="d-inline align-items-end">Cargar Excel<a class="btn btn-info" asp-action="ExportarData">Reporte Excel</a></span>
+            </div>
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-sm-4">
+                        <form id="form" enctype="multipart/form-data">
+                            <input class="form-control-file" type="file" id="inputExcel" name="FileExcel" />
+                        </form>
+                    </div>
+                    <div class="col-sm-4">
+                        <button class="btn btn-warning show-file" onclick="mostrarDatos()">Mostrar Datos</button>
+                        <button class="btn btn-success save-file" onclick="enviarDatos()">Enviar Datos a BD</button>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-sm-12">
+                        <table id="tbData" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Cliente</th>
+                                    <th>Anio</th>
+                                    <th>Mes</th>
+                                    <th>Monto</th>
+                                    <th>Esigef</th>
+                                    <th>EnEsigef</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        const cargando = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                  <b>Cargando...</b>`;
+
+        function mostrarDatos() {
+            const url = "@Url.Action("ShowData", "Presupuesto")/";
+            //const url = "@Url.Action("GenerateExcel", "Presupuesto")/";
+            const formData = new FormData($("#form")[0]);
+
+            $.ajax({
+                url: url,
+                data: formData,
+                method: 'POST',
+                dataType: 'json',
+                cache: false,
+                contentType: false,
+                processData: false,
+                beforeSend: function () {
+                    $('.show-file').html(cargando);
+                }
+            })
+                ///.then((response) => { return response.json() })
+                .done((dataJson) => {
+                    console.log(dataJson);
+                    $('.show-file').html('Mostrar Datos');
+                    dataJson.forEach((item) => {
+                        $("#tbData tbody").append(
+                            $("<tr>").append(
+                                $("<td>").text(item.cliente),
+                                $("<td>").text(item.anio),
+                                $("<td>").text(item.mes),
+                                $("<td>").text(item.monto),
+                                $("<td>").text(item.esigef),
+                                $("<td>").text(item.enesigef)
+                            )
+
+                        )
+                    })
+
+                })
+                .fail((error) => {
+                    $('.show-file').html('Mostrar Datos');
+                    console.error(error);
+                })
+
+        }
+        function enviarDatos() {
+            const url = "@Url.Action("SaveData", "Presupuesto")/";
+            const formData = new FormData($("#form")[0]);
+
+            $.ajax({
+                url: url,
+                data: formData,
+                method: 'POST',
+                dataType: 'json',
+                cache: false,
+                contentType: false,
+                processData: false,
+                beforeSend: function () {
+                    $('.save-file').html(cargando);
+                }
+            })
+                ///.then((response) => { return response.json() })
+                .done((dataJson) => {
+                    console.log(dataJson);
+                    $('.save-file').html('Enviar Datos a BD');
+
+                })
+                .fail((error) => {
+                    $('.save-file').html('Enviar Datos a BD');
+                    console.error(error);
+                })
+
+        }
+    </script>
+}
