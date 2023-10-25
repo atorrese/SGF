@@ -78,8 +78,8 @@ namespace SGF.Controllers
                         Presupuesto contact = new Presupuesto
                         {
                             Cliente = row.Cell(1).GetString(),
-                            Anio = 2023, //row.Cell(2).GetString(),
-                            Mes = 9, //row.Cell(3).GetString(),
+                            Anio = 2023,
+                            Mes = 9,
                             Monto = row.Cell(3).GetDouble(),
                         };
                         contacts.Add(contact);
