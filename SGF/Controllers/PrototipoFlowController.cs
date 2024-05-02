@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using SGF.Models;
 using Bogus;
+using ClosedXML.Excel;
 
 namespace SGF.Controllers
 {
@@ -40,6 +41,43 @@ namespace SGF.Controllers
                 pedidos.Add(pedido);
             }
             return View(pedidos);
+        }
+
+        public IActionResult LoadData([FromForm] IFormFile fileExcel, string country, string sql_data)
+        {
+            try
+            {
+                List<string> errors = new List<string>();
+                string json = (sql_data != null) ? sql_data : "";
+                if (sql_data == null)
+                {
+                    var workbook = new XLWorkbook(fileExcel.OpenReadStream());
+                    var sheet = workbook.Worksheet(1);
+                    var firstRowUsed = sheet.FirstRowUsed().RangeAddress.FirstAddress.RowNumber;
+                    var lastRowUsed = sheet.LastRowUsed().RangeAddress.FirstAddress.RowNumber;
+                    for (int i = firstRowUsed + 1; i <= lastRowUsed; i++)
+                    {
+                        string? message = null;
+                        var row = sheet.Row(i);
+                    }
+                }
+
+                return StatusCode(StatusCodes.Status200OK, new
+                {
+                    errors,
+                    // controles = controlesCalidad,
+                    // correct_records = controlesCalidadCorrectas,
+                    // incorrect_records = controlesCalidadIncorrectas,
+                    // number_of_correct_records = controlesCalidadCorrectas.Count(),
+                    // number_of_incorrect_records = controlesCalidadIncorrectas.Count(),
+                    country,
+                    sql_data= json
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         // GET: PrototipoFlowController/Details/5
