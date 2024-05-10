@@ -32,6 +32,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=PrototipoFlow}/{action=Index}/{id?}");
+    pattern: "{controller=Documento}/{action=Index}/{id?}");
 
 app.Run();

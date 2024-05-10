@@ -1,0 +1,39 @@
+﻿@model List<Documento>
+
+@{
+    ViewData["Title"] = "Listado de Documentos";
+}
+<div class="container">
+    <div class="container-fluid">
+        <div class="card">
+            <div class="card-title text-center">
+                <h1>Listado de Documentos</h1>
+            </div>
+            <div class="card-body rounded-3 border-dark">
+                <table class="table table-hover table-striped" role="grid">
+                    <thead>
+                    <tr>
+                        <th class="text-center">Id</th>
+                        <th class="text-center">Ruc</th>
+                        <th class="text-center">Emisor</th>
+                        <th class="text-center">Fecha</th>
+                        <th class="text-center">Total</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (Documento documento in @Model)
+                    {
+                        <tr>
+                            <td>@documento.Id</td>
+                            <td>@documento.Ruc</td>
+                            <td>@documento.Emisor</td>
+                            <td>@documento.Fecha</td>
+                            <td>@documento.Total</td>
+                        </tr> 
+                    }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
