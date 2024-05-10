@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Aspose.Tasks" Version="24.4.0" />
+    <PackageReference Include="Aspose.Words" Version="24.5.0" />
     <PackageReference Include="Bogus" Version="35.5.1" />
     <PackageReference Include="ClosedXML" Version="0.102.1" />
     <PackageReference Include="iTextSharp" Version="5.5.13.3" />
